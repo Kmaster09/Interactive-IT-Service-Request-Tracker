@@ -8,108 +8,141 @@ import {
 
 import { colors, spacing } from '../utils/theme';
 
-// Add these props inside the function parentheses:
-// id, title, platform, type, status, onAdvance, onDelete
-export default function PostCard() {
+export default function PostCard({
+  id,
+  title,
+  platform,
+  type,
+  status,
+  onAdvance,
+  onDelete,
+}) {
+  const statusColor =
+    status === 'Published'
+      ? colors.published
+      : status === 'Scheduled'
+        ? colors.warning
+        : colors.primary;
+
   return (
     <View style={styles.card}>
       <View style={styles.topRow}>
-        {/* Display the platform prop below. */}
-        <Text style={styles.platform}></Text>
+        <Text style={styles.platform}>{platform}</Text>
 
-        {/* Display the status prop and apply the matching status style. */}
-        <Text style={styles.status}></Text>
+        <Text
+          style={[
+            styles.status,
+            {
+              color: statusColor,
+              backgroundColor: `${statusColor}20`,
+            },
+          ]}
+        >
+          {status}
+        </Text>
       </View>
 
-      {/* Display the title prop below. */}
-      <Text style={styles.title}></Text>
+      <Text style={styles.title}>{title}</Text>
 
-      {/* Display the content type prop below. */}
-      <Text style={styles.type}></Text>
+      <Text style={styles.type}>{type}</Text>
 
-      {/* Connect this button to onAdvance(id). */}
-      <Pressable style={styles.primaryButton}>
-        {/* Use the status prop to display the correct button text. */}
-        <Text style={styles.primaryButtonText}></Text>
+      <Pressable
+        onPress={() => onAdvance(id)}
+        style={styles.primaryButton}
+        disabled={status === 'Published'}
+      >
+        <Text style={styles.primaryButtonText}>
+          {status === 'Draft'
+            ? 'MOVE TO SCHEDULED'
+            : status === 'Scheduled'
+              ? 'MARK PUBLISHED'
+              : 'PUBLISHED ✓'}
+        </Text>
       </Pressable>
 
-      {/* Show the delete button only when status is Published. */}
-
+      {status === 'Published' ? (
+        <Pressable
+          onPress={() => onDelete(id)}
+          style={styles.deleteButton}
+        >
+          <Text style={styles.deleteButtonText}>
+            REMOVE FROM QUEUE
+          </Text>
+        </Pressable>
+      ) : null}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
-    borderRadius: 20,
+    backgroundColor: colors.card,
     borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 16,
     padding: spacing.md,
+    marginBottom: spacing.md,
   },
 
   topRow: {
-    alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing.sm,
   },
 
   platform: {
-    color: colors.primary,
-    fontSize: 11,
-    fontWeight: '900',
-    letterSpacing: 1.1,
-    textTransform: 'uppercase',
+    color: colors.mutedText,
+    fontSize: 14,
+    fontWeight: '600',
   },
 
   status: {
-    borderRadius: 999,
-    fontSize: 11,
-    fontWeight: '900',
-    overflow: 'hidden',
+    fontSize: 12,
+    fontWeight: '800',
     paddingHorizontal: 10,
-    paddingVertical: 6,
+    paddingVertical: 5,
+    borderRadius: 20,
   },
 
   title: {
     color: colors.text,
-    fontSize: 21,
-    fontWeight: '900',
-    marginTop: 14,
+    fontSize: 20,
+    fontWeight: '800',
+    marginBottom: 4,
   },
 
   type: {
     color: colors.mutedText,
     fontSize: 14,
-    marginTop: 6,
+    marginBottom: spacing.md,
   },
 
   primaryButton: {
+    backgroundColor: colors.primary,
+    borderRadius: 10,
+    padding: spacing.sm,
     alignItems: 'center',
-    backgroundColor: colors.surfaceAlt,
-    borderColor: colors.border,
-    borderRadius: 12,
-    borderWidth: 1,
-    marginTop: spacing.md,
-    paddingVertical: 12,
   },
 
   primaryButtonText: {
-    color: colors.text,
-    fontSize: 12,
-    fontWeight: '900',
-    letterSpacing: 0.7,
+    color: '#FFFFFF',
+    fontWeight: '800',
+    fontSize: 13,
   },
 
   deleteButton: {
+    borderWidth: 1,
+    borderColor: colors.danger,
+    borderRadius: 10,
+    padding: spacing.sm,
     alignItems: 'center',
     marginTop: spacing.sm,
-    paddingVertical: 10,
   },
 
   deleteButtonText: {
     color: colors.danger,
-    fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '800',
+    fontSize: 13,
   },
 });
