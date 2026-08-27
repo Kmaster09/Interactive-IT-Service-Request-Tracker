@@ -6,42 +6,71 @@ import {
   View,
 } from 'react-native';
 
-import PostCard from '../components/PostCard';
 import PostComposer from '../components/PostComposer';
+import PostCard from '../components/PostCard';
 import StatusFilter from '../components/StatusFilter';
+
 import starterPosts from '../data/starterPosts';
 import createId from '../utils/createId';
 import { colors, spacing } from '../utils/theme';
 
 export default function CreatorQueueScreen() {
-  // Store starterPosts in posts state.
   const [posts, setPosts] = useState(starterPosts);
-
-  // Store All in selectedFilter state.
   const [selectedFilter, setSelectedFilter] = useState('All');
 
   function handleAddPost(formValues) {
-    // Create a new post object with a unique id and Draft status.
-    // Then add the new post to the beginning of the posts array.
+    const newPost = {
+      id: createId(),
+      title: formValues.title,
+      platform: formValues.platform,
+      type: formValues.type,
+      status: 'Draft',
+    };
 
+    setPosts((currentPosts) => [
+      newPost,
+      ...currentPosts,
+    ]);
   }
 
   function handleAdvancePost(id) {
-    // Use map() to advance only the matching post:
-    // Draft -> Scheduled
-    // Scheduled -> Published
-    // Published -> Published
+    setPosts((currentPosts) =>
+      currentPosts.map((post) => {
+        if (post.id !== id) {
+          return post;
+        }
 
+        if (post.status === 'Draft') {
+          return {
+            ...post,
+            status: 'Scheduled',
+          };
+        }
+
+        if (post.status === 'Scheduled') {
+          return {
+            ...post,
+            status: 'Published',
+          };
+        }
+
+        return post;
+      })
+    );
   }
 
   function handleDeletePost(id) {
-    // Use filter() to remove the matching published post.
-
+    setPosts((currentPosts) =>
+      currentPosts.filter((post) => post.id !== id)
+    );
   }
 
-  // Create filteredPosts so All shows everything
-  // and each other filter shows only matching statuses.
-  const filteredPosts = posts;
+  const filteredPosts =
+    selectedFilter === 'All'
+      ? posts
+      : posts.filter(
+          (post) => post.status === selectedFilter
+        );
 
   const publishedCount = posts.filter(
     (post) => post.status === 'Published'
@@ -52,112 +81,151 @@ export default function CreatorQueueScreen() {
       style={styles.screen}
       contentContainerStyle={styles.content}
     >
-      <Text style={styles.eyebrow}>CREATOR WORKSPACE</Text>
-      <Text style={styles.heading}>Content Queue</Text>
-      <Text style={styles.subtitle}>
-        Draft ideas, schedule content, and move posts toward publish.
-      </Text>
+      <View style={styles.header}>
+        <Text style={styles.kicker}>CONTENT PLANNER</Text>
+
+        <Text style={styles.title}>
+          Creator Queue
+        </Text>
+
+        <Text style={styles.subtitle}>
+          Plan, schedule, and publish your content.
+        </Text>
+      </View>
 
       <View style={styles.statsRow}>
         <View style={styles.statCard}>
-          <Text style={styles.statValue}>{posts.length}</Text>
-          <Text style={styles.statLabel}>TOTAL</Text>
+          <Text style={styles.statNumber}>
+            {posts.length}
+          </Text>
+
+          <Text style={styles.statLabel}>
+            Total Posts
+          </Text>
         </View>
 
         <View style={styles.statCard}>
-          <Text style={styles.statValue}>{publishedCount}</Text>
-          <Text style={styles.statLabel}>PUBLISHED</Text>
+          <Text style={styles.statNumber}>
+            {publishedCount}
+          </Text>
+
+          <Text style={styles.statLabel}>
+            Published
+          </Text>
         </View>
       </View>
 
       <PostComposer onAdd={handleAddPost} />
+
+      <Text style={styles.sectionTitle}>
+        Filter Queue
+      </Text>
 
       <StatusFilter
         selectedFilter={selectedFilter}
         onChangeFilter={setSelectedFilter}
       />
 
-      <View style={styles.list}>
-        {/* Use filteredPosts.map() to display one PostCard per post. */}
+      <Text style={styles.sectionTitle}>
+        Content Queue
+      </Text>
 
+      {filteredPosts.map((post) => (
+        <PostCard
+          key={post.id}
+          id={post.id}
+          title={post.title}
+          platform={post.platform}
+          type={post.type}
+          status={post.status}
+          onAdvance={handleAdvancePost}
+          onDelete={handleDeletePost}
+        />
+      ))}
 
-        {/* Display the empty-list message only when filteredPosts is empty. */}
-
-      </View>
+      {filteredPosts.length === 0 ? (
+        <Text style={styles.emptyMessage}>
+          No content matches this filter.
+        </Text>
+      ) : null}
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   screen: {
-    backgroundColor: colors.background,
     flex: 1,
+    backgroundColor: colors.background,
   },
 
   content: {
     padding: spacing.lg,
-    paddingBottom: 48,
+    paddingBottom: 60,
   },
 
-  eyebrow: {
-    color: colors.accent,
-    fontSize: 11,
-    fontWeight: '900',
+  header: {
+    marginBottom: spacing.lg,
+  },
+
+  kicker: {
+    color: colors.primary,
+    fontSize: 13,
+    fontWeight: '800',
     letterSpacing: 1.5,
+    marginBottom: spacing.sm,
   },
 
-  heading: {
+  title: {
     color: colors.text,
-    fontSize: 36,
+    fontSize: 34,
     fontWeight: '900',
-    marginTop: 6,
+    marginBottom: spacing.sm,
   },
 
   subtitle: {
     color: colors.mutedText,
-    fontSize: 15,
-    lineHeight: 22,
-    marginBottom: spacing.lg,
-    marginTop: 8,
+    fontSize: 16,
+    lineHeight: 24,
   },
 
   statsRow: {
     flexDirection: 'row',
-    gap: spacing.sm,
+    gap: spacing.md,
     marginBottom: spacing.lg,
   },
 
   statCard: {
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
-    borderRadius: 18,
-    borderWidth: 1,
     flex: 1,
+    backgroundColor: colors.card,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 16,
     padding: spacing.md,
   },
 
-  statValue: {
+  statNumber: {
     color: colors.text,
-    fontSize: 26,
+    fontSize: 28,
     fontWeight: '900',
   },
 
   statLabel: {
     color: colors.mutedText,
-    fontSize: 10,
-    fontWeight: '900',
-    letterSpacing: 1.1,
-    marginTop: 3,
+    fontSize: 13,
+    marginTop: 4,
   },
 
-  list: {
-    gap: spacing.md,
+  sectionTitle: {
+    color: colors.text,
+    fontSize: 20,
+    fontWeight: '800',
+    marginBottom: spacing.md,
   },
 
   emptyMessage: {
     color: colors.mutedText,
-    fontSize: 15,
-    paddingVertical: spacing.xl,
     textAlign: 'center',
+    paddingVertical: spacing.xl,
+    fontSize: 16,
   },
 });
