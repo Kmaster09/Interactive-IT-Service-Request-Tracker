@@ -13,6 +13,13 @@ const starterPosts = [
     type: 'Video',
     status: 'Scheduled',
   },
+  {
+  id: 'post-1003',
+  title: 'Game Night Highlights',
+  platform: 'YouTube',
+  type: 'Short',
+  status: 'Published',
+  },
 
   // Add the third starter post from README.md below.
 
