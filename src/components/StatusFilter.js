@@ -8,7 +8,12 @@ import {
 
 import { colors, spacing } from '../utils/theme';
 
-const filterOptions = ['All', 'Draft', 'Scheduled', 'Published'];
+const filterOptions = [
+  'All',
+  'Draft',
+  'Scheduled',
+  'Published',
+];
 
 export default function StatusFilter({
   selectedFilter,
@@ -16,8 +21,29 @@ export default function StatusFilter({
 }) {
   return (
     <View style={styles.container}>
-      {/* Use filterOptions.map() to display the filter buttons below. */}
+      {filterOptions.map((option) => {
+        const isActive = selectedFilter === option;
 
+        return (
+          <Pressable
+            key={option}
+            onPress={() => onChangeFilter(option)}
+            style={[
+              styles.button,
+              isActive && styles.activeButton,
+            ]}
+          >
+            <Text
+              style={[
+                styles.text,
+                isActive && styles.activeText,
+              ]}
+            >
+              {option}
+            </Text>
+          </Pressable>
+        );
+      })}
     </View>
   );
 }
@@ -27,16 +53,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: spacing.sm,
-    marginVertical: spacing.lg,
+    marginBottom: spacing.lg,
   },
 
   button: {
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
-    borderRadius: 999,
+    backgroundColor: colors.card,
     borderWidth: 1,
-    paddingHorizontal: 14,
-    paddingVertical: 9,
+    borderColor: colors.border,
+    borderRadius: 20,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
   },
 
   activeButton: {
@@ -46,8 +72,7 @@ const styles = StyleSheet.create({
 
   text: {
     color: colors.mutedText,
-    fontSize: 12,
-    fontWeight: '800',
+    fontWeight: '700',
   },
 
   activeText: {
